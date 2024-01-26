@@ -1,7 +1,7 @@
 const { Thought, User } = require('../models');
 
 const thoughtController = {
-    getAllTHoughts(req,res) {
+    getAllThought(req,res) {
         Thought.find({})
         .populate({
             path: 'reactions',
@@ -78,30 +78,23 @@ const thoughtController = {
         });
     },
 
-    deleteThought({params}, res) {
-        Thought.findOneAndDelete({_id:params.id})
-        .then(dbThoughtData => {
-            if(!dbThoughtData){
-                res.status(404).json({message: 'Sorry, no thought with that id was found!'});
-                return;
-            }
+    deleteThought(req, res) {
+        Thought.findOneAndDelete({_id: req.params.id})
+        .then((thought) => {
+            if(!thought){
+                res.status(404).json({message: 'No thought with that ID'}
+                )
+            }      
+            
             return User.findOneAndUpdate(
-                {_id:params.userId},
-                {$pull: {thoughts:params.id}},
-                {new:true}
+                {_id:req.body.userID},
+                {$pull:{thoughts:thought._id}},
+                {new:true}     
+                )}
             )
-        })
-        .then(dbUserData => {
-            if(!dbUserData) {
-                res.status(404).json({message: 'Sorry, no user with that id was found!'});
-                return;
-            }
-            res.json(dbUserData);
-        })
-        .catch(err => {
-            console.log(err);
-            res.sendStatus(400)
-        })
+            .then(() => res.json({message: 'User and associated apps deleted!'}
+        ))
+        .catch((err) => res.status(500).json(err));
     },
 
     createReaction({params}, res){

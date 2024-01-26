@@ -16,9 +16,9 @@ router
     .post(createUser);
 
 router
-    .route(':id')
+    .route('/:id')
     .get(getUserById)
-    .put(addFriend)
+    .put(updateUser)
     .delete(deleteUser);
 
 router
